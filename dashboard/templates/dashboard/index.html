@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Dashboard - VENTAS X CATÁLOGO</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2d6a4f;
+            --secondary-color: #ff6b6b;
+            --success-color: #4ecdc4;
+            --warning-color: #ffe66d;
+            --danger-color: #ef476f;
+            --info-color: #4a90e2;
+        }
+
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--primary-color) 0%, #1b4332 100%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* KPI CARDS */
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .kpi-card.vendido {
+            border-left-color: var(--success-color);
+        }
+
+        .kpi-card.cobrado {
+            border-left-color: var(--info-color);
+        }
+
+        .kpi-card.deuda {
+            border-left-color: var(--danger-color);
+        }
+
+        .kpi-card.ganancia {
+            border-left-color: var(--warning-color);
+        }
+
+        .kpi-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .kpi-label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .kpi-card.vendido .kpi-value {
+            color: var(--success-color);
+        }
+
+        .kpi-card.cobrado .kpi-value {
+            color: var(--info-color);
+        }
+
+        .kpi-card.deuda .kpi-value {
+            color: var(--danger-color);
+        }
+
+        .kpi-card.ganancia .kpi-value {
+            color: var(--warning-color);
+        }
+
+        .kpi-meta {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        /* TABS */
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+
+        .nav-tabs .nav-link {
+            color: #666;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: white;
+            background-color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* SECTIONS */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CHARTS */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        /* TABLES */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table th {
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 12px;
+            border: none;
+        }
+
+        .table td {
+            padding: 12px;
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* BADGES */
+        .badge-success {
+            background-color: var(--success-color);
+        }
+
+        .badge-danger {
+            background-color: var(--danger-color);
+        }
+
+        .badge-info {
+            background-color: var(--info-color);
+        }
+
+        .badge-warning {
+            background-color: var(--warning-color);
+            color: #333;
+        }
+
+        /* MONEY FORMATTING */
+        .money {
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        .money.danger {
+            color: var(--danger-color);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .kpi-value {
+                font-size: 1.4rem;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <i class="fas fa-chart-line"></i> DASHBOARD VENTAS
+            </span>
+            <div class="ms-auto text-white">
+                <small>Última actualización: <span id="update-time">Ahora</span></small>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <div class="dashboard-container">
+        <!-- KPI SECTION -->
+        <div class="row">
+            <div class="col-md-6 col-lg-3">
+                <div class="kpi-card vendido">
+                    <div class="kpi-icon">💰</div>
+                    <div class="kpi-label">Total Vendido</div>
+                    <div class="kpi-value">$ {{ total_vendido|default:0|floatformat:0 }}</div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="kpi-card cobrado">
+                    <div class="kpi-icon">💸</div>
+                    <div class="kpi-label">Total Cobrado</div>
+                    <div class="kpi-value">$ {{ total_cobrado|default:0|floatformat:0 }}</div>
+                    <div class="kpi-meta">{{ pct_cobrado }}% cobrado</div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="kpi-card deuda">
+                    <div class="kpi-icon">📉</div>
+                    <div class="kpi-label">Total Deuda</div>
+                    <div class="kpi-value">$ {{ total_deuda|default:0|floatformat:0 }}</div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="kpi-card ganancia">
+                    <div class="kpi-icon">📈</div>
+                    <div class="kpi-label">Ganancia Total</div>
+                    <div class="kpi-value">$ {{ ganancia_total|default:0|floatformat:0 }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABS NAVIGATION -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" onclick="showSection('graficos')" href="javascript:void(0)">
+                    <i class="fas fa-chart-bar"></i> Gráficos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showSection('productos')" href="javascript:void(0)">
+                    <i class="fas fa-box"></i> Productos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showSection('clientes')" href="javascript:void(0)">
+                    <i class="fas fa-users"></i> Clientes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showSection('deudores')" href="javascript:void(0)">
+                    <i class="fas fa-dollar-sign"></i> Deudores
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showSection('cumpleanos')" href="javascript:void(0)">
+                    <i class="fas fa-birthday-cake"></i> Cumpleaños
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showSection('stock')" href="javascript:void(0)">
+                    <i class="fas fa-warehouse"></i> Stock
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showSection('vendedores')" href="javascript:void(0)">
+                    <i class="fas fa-user-tie"></i> Vendedores
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showSection('ultimas')" href="javascript:void(0)">
+                    <i class="fas fa-history"></i> Últimas Ventas
+                </a>
+            </li>
+        </ul>
+
+        <!-- SECTION: GRÁFICOS -->
+        <div id="graficos" class="content-section active">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <div class="chart-title">Ventas por Mes (Últimos 6 meses)</div>
+                        <canvas id="chartMeses"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <div class="chart-title">Productos Más Vendidos</div>
+                        <canvas id="chartProductos"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <div class="chart-title">Ventas por Campaña</div>
+                        <canvas id="chartCampanas"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="chart-container">
+                        <div class="chart-title">Ventas por Vendedor</div>
+                        <canvas id="chartVendedores"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: PRODUCTOS -->
+        <div id="productos" class="content-section">
+            <div class="table-container">
+                <div class="table-title">Top 10 Productos Más Vendidos</div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Producto</th>
+                                <th class="text-end">Cantidad Vendida</th>
+                                <th class="text-end">Ganancia Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos_mas_vendidos %}
+                            <tr>
+                                <td><badge class="badge badge-info">{{ forloop.counter }}</badge></td>
+                                <td>{{ producto.nombre }}</td>
+                                <td class="text-end"><strong>{{ producto.cantidad }}</strong> unidades</td>
+                                <td class="text-end"><span class="money">$ {{ producto.ganancia|floatformat:0 }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="no-data">
+                                    <i class="fas fa-info-circle"></i> No hay productos vendidos
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: CLIENTES -->
+        <div id="clientes" class="content-section">
+            <div class="table-container">
+                <div class="table-title">Clientes con Mayor Deuda (Top 15)</div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th class="text-end">Deuda</th>
+                                <th>Contacto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cliente in clientes_con_deuda %}
+                            <tr>
+                                <td><span class="badge badge-danger">{{ forloop.counter }}</span></td>
+                                <td><strong>{{ cliente.nombre }}</strong></td>
+                                <td class="text-end"><span class="money danger">$ {{ cliente.deuda|floatformat:0 }}</span></td>
+                                <td>{{ cliente.telefono }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="no-data">
+                                    <i class="fas fa-check-circle"></i> ¡No hay deudas!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: DEUDORES -->
+        <div id="deudores" class="content-section">
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle"></i> Listado de Clientes con Deuda
+            </div>
+            <div class="table-container">
+                <div class="table-title">Deudores (Ordenado por Mayor Deuda)</div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th class="text-end">Deuda Total</th>
+                                <th>Teléfono</th>
+                                <th class="text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cliente in clientes_con_deuda %}
+                            <tr>
+                                <td><span class="badge badge-danger">{{ forloop.counter }}</span></td>
+                                <td><strong>{{ cliente.nombre }}</strong></td>
+                                <td class="text-end"><span class="money danger">$ {{ cliente.deuda|floatformat:0 }}</span></td>
+                                <td>
+                                    {% if cliente.telefono != '-' %}
+                                        <i class="fas fa-phone"></i> {{ cliente.telefono }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="/admin/pagos/pago/" class="btn btn-sm btn-success" title="Registrar pago">
+                                        <i class="fas fa-credit-card"></i> Pago
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="no-data">
+                                    <i class="fas fa-check-circle"></i> ¡Excelente! No hay deudas pendientes.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: CUMPLEAÑOS -->
+        <div id="cumpleanos" class="content-section">
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-birthday-cake"></i> Cumpleaños de Clientes en los Próximos 7 Días
+            </div>
+            <div class="table-container">
+                <div class="table-title">Próximos Cumpleaños</div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th class="text-center">Fecha de Cumpleaños</th>
+                                <th class="text-center">Edad</th>
+                                <th class="text-center">Días Falta</th>
+                                <th>Teléfono</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cumple in cumpleanos_proximos %}
+                            <tr class="table-info">
+                                <td><span class="badge badge-info">{{ forloop.counter }}</span></td>
+                                <td><strong>{{ cumple.nombre }}</strong></td>
+                                <td class="text-center">{{ cumple.fecha|date:"d/m" }}</td>
+                                <td class="text-center">
+                                    <span class="badge badge-primary">{{ cumple.edad }} años</span>
+                                </td>
+                                <td class="text-center">
+                                    {% if cumple.dias_falta == 0 %}
+                                        <span class="badge badge-danger" style="background-color: #ff6b6b;">¡Hoy!</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">{{ cumple.dias_falta }} días</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if cumple.telefono != '-' %}
+                                        <i class="fas fa-phone"></i> {{ cumple.telefono }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="no-data">
+                                    <i class="fas fa-calendar-check"></i> No hay cumpleaños próximos en los siguientes 7 días.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: STOCK -->
+        <div id="stock" class="content-section">
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> Productos con stock bajo (menos de 10 unidades)
+            </div>
+            <div class="table-container">
+                <div class="table-title">Stock Bajo</div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th class="text-end">Stock Actual</th>
+                                <th class="text-end">Precio Sugerido</th>
+                                <th class="text-end">Costo</th>
+                                <th class="text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in stock_bajo %}
+                            <tr class="{% if producto.cantidad|add:0 <= 3 %}table-danger{% else %}table-warning{% endif %}">
+                                <td><strong>{{ producto.nombre }}</strong></td>
+                                <td class="text-end">
+                                    {% if producto.cantidad <= 3 %}
+                                        <span class="badge badge-danger">{{ producto.cantidad }} u.</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">{{ producto.cantidad }} u.</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">$ {{ producto.precio_sugerido|floatformat:0 }}</td>
+                                <td class="text-end">$ {{ producto.costo|floatformat:0 }}</td>
+                                <td class="text-center">
+                                    {% if producto.cantidad == 0 %}
+                                        <i class="fas fa-times-circle" style="color: red; font-size: 1.2rem;"></i>
+                                    {% elif producto.cantidad <= 3 %}
+                                        <i class="fas fa-exclamation-circle" style="color: orange; font-size: 1.2rem;"></i>
+                                    {% else %}
+                                        <i class="fas fa-exclamation" style="color: #ff9800; font-size: 1.2rem;"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="no-data">
+                                    <i class="fas fa-check-circle"></i> ¡Stock completo!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: VENDEDORES -->
+        <div id="vendedores" class="content-section">
+            <div class="table-container">
+                <div class="table-title">Desempeño de Vendedores</div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Vendedor</th>
+                                <th class="text-end">Total Vendido</th>
+                                <th class="text-end">Cantidad de Ventas</th>
+                                <th class="text-end">Promedio por Venta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vendedor in ventas_por_vendedor %}
+                            <tr>
+                                <td><span class="badge badge-info">{{ forloop.counter }}</span></td>
+                                <td><strong>{{ vendedor.vendedor__nombre }}</strong></td>
+                                <td class="text-end"><span class="money">$ {{ vendedor.total|floatformat:0 }}</span></td>
+                                <td class="text-end"><strong>{{ vendedor.cantidad }}</strong> ventas</td>
+                                <td class="text-end">$ {{ vendedor.total|add:0|divisibleby:vendedor.cantidad|floatformat:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="no-data">
+                                    <i class="fas fa-info-circle"></i> No hay datos de vendedores
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: ÚLTIMAS VENTAS -->
+        <div id="ultimas" class="content-section">
+            <div class="table-container">
+                <div class="table-title">Últimas 20 Ventas</div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Venta #</th>
+                                <th>Cliente</th>
+                                <th>Campaña / Stock</th>
+                                <th>Vendedor</th>
+                                <th class="text-end">Total</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venta in ultimas_ventas %}
+                            <tr>
+                                <td><strong>#{{ venta.id }}</strong></td>
+                                <td>{{ venta.cliente.nombre }}</td>
+                                <td>
+                                    {% if venta.campana %}
+                                        <span class="badge badge-success">{{ venta.campana.nombre }}</span>
+                                    {% else %}
+                                        <span class="badge badge-info">Stock</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ venta.vendedor.nombre|default:"-" }}</td>
+                                <td class="text-end"><span class="money">$ {{ venta.total|floatformat:0 }}</span></td>
+                                <td>{{ venta.fecha|date:"d/m/Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="no-data">
+                                    <i class="fas fa-inbox"></i> No hay ventas registradas
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // VARIABLES GLOBALES CON DATOS DEL SERVIDOR
+        const chartColors = {
+            primary: '#2d6a4f',
+            secondary: '#ff6b6b',
+            success: '#4ecdc4',
+            warning: '#ffe66d',
+            danger: '#ef476f',
+            info: '#4a90e2',
+            light: '#f8f9fa',
+        };
+
+        const mesesData = {{ meses_json|safe }};
+        const totalesMesData = {{ totales_mes_json|safe }};
+        const productosData = {{ productos_json|safe }};
+        const campanasNombres = {{ campanas_nombres_json|safe }};
+        const campanasData = {{ campanas_totales_json|safe }};
+        const vendedoresNombres = {{ vendedores_nombres_json|safe }};
+        const vendedoresData = {{ vendedores_totales_json|safe }};
+
+        // FUNCIÓN PARA CAMBIAR SECCIÓN
+        function showSection(sectionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+
+            // Actualizar tabs activos
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Re-renderizar gráficos si es necesario
+            if (sectionId === 'graficos') {
+                setTimeout(() => {
+                    resizeCharts();
+                }, 100);
+            }
+        }
+
+        // GRÁFICO: VENTAS POR MES
+        let chartMeses, chartProductos, chartCampanas, chartVendedores;
+
+        function initCharts() {
+            const ctx1 = document.getElementById('chartMeses');
+            if (ctx1) {
+                chartMeses = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: mesesData,
+                        datasets: [{
+                            label: 'Ventas',
+                            data: totalesMesData,
+                            borderColor: chartColors.primary,
+                            backgroundColor: 'rgba(45, 106, 79, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: chartColors.primary,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { callback: value => '$' + value }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const ctx2 = document.getElementById('chartProductos');
+            if (ctx2 && productosData.length > 0) {
+                const nombres = productosData.map(p => p.name);
+                const cantidades = productosData.map(p => p.cantidad);
+
+                chartProductos = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: nombres,
+                        datasets: [{
+                            label: 'Unidades Vendidas',
+                            data: cantidades,
+                            backgroundColor: [
+                                chartColors.primary,
+                                chartColors.success,
+                                chartColors.info,
+                                chartColors.warning,
+                                chartColors.danger,
+                                '#7cb9e8',
+                                '#92c9b1',
+                                '#ffb3ba',
+                                '#ffffba',
+                                '#baffc9',
+                            ],
+                            borderRadius: 5,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true }
+                        },
+                        scales: {
+                            x: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            const ctx3 = document.getElementById('chartCampanas');
+            if (ctx3 && campanasData.length > 0) {
+                chartCampanas = new Chart(ctx3, {
+                    type: 'doughnut',
+                    data: {
+                        labels: campanasNombres,
+                        datasets: [{
+                            data: campanasData,
+                            backgroundColor: [
+                                chartColors.primary,
+                                chartColors.success,
+                                chartColors.info,
+                                chartColors.warning,
+                                chartColors.danger,
+                                '#9d84b7',
+                                '#f9a825',
+                                '#7eccc4',
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right' }
+                        }
+                    }
+                });
+            }
+
+            const ctx4 = document.getElementById('chartVendedores');
+            if (ctx4 && vendedoresData.length > 0) {
+                chartVendedores = new Chart(ctx4, {
+                    type: 'bar',
+                    data: {
+                        labels: vendedoresNombres,
+                        datasets: [{
+                            label: 'Total Vendido',
+                            data: vendedoresData,
+                            backgroundColor: chartColors.secondary,
+                            borderRadius: 5,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { callback: value => '$' + value }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function resizeCharts() {
+            if (chartMeses) chartMeses.resize();
+            if (chartProductos) chartProductos.resize();
+            if (chartCampanas) chartCampanas.resize();
+            if (chartVendedores) chartVendedores.resize();
+        }
+
+        // INICIALIZAR AL CARGAR
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            updateTime();
+            setInterval(updateTime, 60000);
+        });
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('update-time').textContent = now.toLocaleTimeString('es-AR');
+        }
+    </script>
+</body>
+</html>

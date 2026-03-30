@@ -1,0 +1,19 @@
+<h1>Listado de Ventas</h1>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Total</th>
+        <th>Fecha</th>
+    </tr>
+
+    {% for v in ventas %}
+    <tr>
+        <td>{{ v.id }}</td>
+        <td>{{ v.cliente }}</td>
+        <td>{{ v.total }}</td>
+        <td>{{ v.fecha }}</td>
+    </tr>
+    {% endfor %}
+</table>
