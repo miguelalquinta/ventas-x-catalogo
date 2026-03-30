@@ -43,13 +43,10 @@ class PagoAdmin(admin.ModelAdmin):
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'venta':
-            # Mostrar solo ventas con saldo pendiente
-            from django.db.models import F
-            kwargs['queryset'] = Venta.objects.annotate(
-                saldo=F('total') - Venta.objects.filter(id=F('id')).values('total_pagado')
-            ).filter(
-                saldo__gt=0
-            ).select_related('cliente').order_by('-fecha')
+            # Obtener IDs de ventas con saldo pendiente
+            todas_ventas = Venta.objects.select_related('cliente').order_by('-fecha')
+            ventas_pendientes_ids = [v.id for v in todas_ventas if v.saldo_pendiente() > 0]
+            kwargs['queryset'] = Venta.objects.filter(id__in=ventas_pendientes_ids).select_related('cliente').order_by('-fecha')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
     def ver_total_venta(self, obj):
