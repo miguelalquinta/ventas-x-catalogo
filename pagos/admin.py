@@ -62,13 +62,13 @@ class VentaPendienteAdmin(admin.ModelAdmin):
     list_display = ('id', 'cliente', 'ver_total', 'ver_total_pagado', 'ver_saldo', 'fecha')
     list_filter = ('fecha',)
     search_fields = ('cliente__nombre',)
-    readonly_fields = ('ver_total', 'ver_total_pagado', 'ver_saldo', 'resumen_pago', 'fecha')
+    readonly_fields = ('ver_total', 'ver_total_pagado', 'ver_saldo', 'fecha')
     fieldsets = (
         ('Información de Venta', {
             'fields': ('cliente', 'vendedor', 'campana', 'fecha')
         }),
         ('Resumen de Pagos', {
-            'fields': ('resumen_pago', 'ver_total', 'ver_total_pagado', 'ver_saldo'),
+            'fields': ('ver_total', 'ver_total_pagado', 'ver_saldo'),
             'classes': ('wide',)
         }),
     )
