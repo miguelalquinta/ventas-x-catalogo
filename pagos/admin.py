@@ -13,9 +13,6 @@ class PagoAdmin(admin.ModelAdmin):
     search_fields = ('venta__cliente__nombre', 'venta__id')
     fields = ('venta', 'monto')
     
-    class Media:
-        js = ('admin/pago_admin.js',)
-    
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
