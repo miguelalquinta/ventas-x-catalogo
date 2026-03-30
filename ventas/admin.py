@@ -43,6 +43,12 @@ class DetalleVentaStockInline(admin.TabularInline):
     fields = ('producto_stock', 'cantidad', 'precio', 'ver_costo', 'ver_subtotal', 'ver_ganancia')
     readonly_fields = ('ver_costo', 'ver_subtotal', 'ver_ganancia')
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'producto_stock':
+            # Ordenar productos en orden ascendente
+            kwargs['queryset'] = kwargs.get('queryset', db_field.remote_field.model.objects.all()).order_by('nombre')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def ver_costo(self, obj):
         if obj.pk:
             return format_html('<b>${}</b>', obj.costo)
@@ -57,7 +63,7 @@ class DetalleVentaStockInline(admin.TabularInline):
         if obj.pk:
             valor = obj.ganancia()
             color = 'green' if valor >= 0 else 'red'
-            return format_html('<b style="color:{};">${}</b>', color, valor)
+            return format_html('<b style="color:{};\">${}</b>', color, valor)
         return format_html('<span class="campo-ganancia">$0</span>')
 
     ver_costo.short_description = "Costo"
@@ -76,10 +82,10 @@ class DetalleVentaInline(admin.TabularInline):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'producto_campana':
-            # Cargar todos los productos de campañas activas
+            # Cargar todos los productos de campañas activas, ordenados por nombre
             qs = ProductoCampana.objects.filter(
                 campana__activa=True
-            ).select_related('campana', 'producto')
+            ).select_related('campana', 'producto').order_by('producto__nombre')
             kwargs['queryset'] = qs
 
             field = super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -114,7 +120,7 @@ class DetalleVentaInline(admin.TabularInline):
         if obj.pk:
             valor = obj.ganancia()
             color = 'green' if valor >= 0 else 'red'
-            return format_html('<b style="color:{};">${}</b>', color, valor)
+            return format_html('<b style="color:{};\">${}</b>', color, valor)
         return format_html('<span class="campo-ganancia">$0</span>')
 
     ver_precio.short_description = "Precio"
@@ -134,9 +140,18 @@ class VentaAdmin(admin.ModelAdmin):
     inlines = [DetalleVentaInline, DetalleVentaStockInline]
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'campana':
+        if db_field.name == 'vendedor':
+            # Ordenar vendedores ascendentemente
+            from vendedores.models import Vendedor
+            kwargs['queryset'] = Vendedor.objects.all().order_by('nombre')
+        elif db_field.name == 'cliente':
+            # Ordenar clientes ascendentemente
+            from clientes.models import Cliente
+            kwargs['queryset'] = Cliente.objects.all().order_by('nombre')
+        elif db_field.name == 'campana':
+            # Ordenar campañas ascendentemente
             from campanas.models import Campana
-            kwargs['queryset'] = Campana.objects.filter(activa=True)
+            kwargs['queryset'] = Campana.objects.filter(activa=True).order_by('nombre')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def campana_display(self, obj):
@@ -150,14 +165,14 @@ class VentaAdmin(admin.ModelAdmin):
     def total_pagado_display(self, obj):
         pagado = obj.total_pagado()
         color = "green" if pagado > 0 else "gray"
-        return format_html('<span style="color:{};">${}</span>', color, pagado)
+        return format_html('<span style="color:{};\">${}</span>', color, pagado)
     total_pagado_display.short_description = "Pagado"
 
     def saldo_display(self, obj):
         saldo = obj.saldo_pendiente()
         if saldo <= 0:
             return format_html('<span style="color:green;">✅ Pagado</span>')
-        return format_html('<span style="color:red; font-weight:bold;">${}</span>', saldo)
+        return format_html('<span style="color:red; font-weight:bold;\">${}</span>', saldo)
     saldo_display.short_description = "Saldo"
 
     class Media:
