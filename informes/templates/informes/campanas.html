@@ -1,9 +1,78 @@
-{% extends "informes/base.html" %}
+{% extends 'informes/base.html' %}
+
+{% block title %}Informe de Campañas{% endblock %}
+
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <h2>🎯 Campañas</h2>
-        <p class="text-muted">Reporte de campañas y ventas</p>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>🎯 Informe de Campañas</h1>
+            <p class="text-muted">Información de campañas activas y cerradas</p>
+        </div>
     </div>
+
+    <div class="filtros-section">
+        <h5>Filtros</h5>
+        <form method="GET" class="row g-3">
+            <div class="col-md-6">
+                <label for="nombre" class="form-label">Buscar por nombre:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ nombre_filtro }}" placeholder="Nombre de la campaña">
+            </div>
+            <div class="col-md-6">
+                <label for="orden" class="form-label">Ordenar por:</label>
+                <select class="form-select" id="orden" name="orden">
+                    <option value="nombre" {% if orden == 'nombre' %}selected{% endif %}>Nombre (A-Z)</option>
+                    <option value="ventas" {% if orden == 'ventas' %}selected{% endif %}>Más Ventas</option>
+                    <option value="total" {% if orden == 'total' %}selected{% endif %}>Mayor Total</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">🔍 Buscar</button>
+                <a href="/informes/campanas/?export=csv{% if nombre_filtro %}&nombre={{ nombre_filtro }}{% endif %}" class="btn btn-success btn-export">📥 Exportar CSV</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="resumen-cards">
+        <div class="resumen-card">
+            <h6>Total Campañas</h6>
+            <div class="valor">{{ total_campanas }}</div>
+        </div>
+    </div>
+
+    {% if campanas_data %}
+    <div class="table-responsive-custom">
+        <table class="table table-hover table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Campaña</th>
+                    <th>Estado</th>
+                    <th class="text-end">Cantidad Ventas</th>
+                    <th class="text-end">Total Vendido</th>
+                    <th class="text-end">Cantidad Productos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in campanas_data %}
+                <tr>
+                    <td>{{ item.campana.nombre }}</td>
+                    <td>
+                        {% if item.estado == 'Abierta' %}
+                            <span class="badge badge-activa">{{ item.estado }}</span>
+                        {% else %}
+                            <span class="badge badge-cerrada">{{ item.estado }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">{{ item.cantidad_ventas }}</td>
+                    <td class="text-end">${{ item.total_vendido|floatformat:0 }}</td>
+                    <td class="text-end">{{ item.cantidad_productos }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">No se encontraron campañas con los criterios especificados.</div>
+    {% endif %}
 </div>
 {% endblock %}

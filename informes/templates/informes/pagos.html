@@ -1,32 +1,88 @@
-{% extends "informes/base.html" %}
+{% extends 'informes/base.html' %}
+
+{% block title %}Informe de Pagos{% endblock %}
+
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <h2>💳 Pagos</h2>
-        <table class="table table-striped">
-            <thead>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>💰 Informe de Pagos</h1>
+            <p class="text-muted">Registro de todos los pagos realizados</p>
+        </div>
+    </div>
+
+    <div class="filtros-section">
+        <h5>Filtros</h5>
+        <form method="GET" class="row g-3">
+            <div class="col-md-6">
+                <label for="cliente" class="form-label">Cliente:</label>
+                <select class="form-select" id="cliente" name="cliente">
+                    <option value="">-- Todos --</option>
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente.nombre }}" {% if cliente_filtro == cliente.nombre %}selected{% endif %}>{{ cliente.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Período:</label>
+                <div class="input-group">
+                    <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde }}" placeholder="Desde">
+                    <span class="input-group-text">-</span>
+                    <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}" placeholder="Hasta">
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">🔍 Filtrar</button>
+                <a href="/informes/pagos/?export=csv{% if cliente_filtro %}&cliente={{ cliente_filtro }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}" class="btn btn-success btn-export">📥 Exportar CSV</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="resumen-cards">
+        <div class="resumen-card">
+            <h6>Total de Pagos</h6>
+            <div class="valor">{{ total_pagos }}</div>
+        </div>
+        <div class="resumen-card">
+            <h6>Monto Total</h6>
+            <div class="valor">${{ total_monto|floatformat:0 }}</div>
+        </div>
+    </div>
+
+    {% if pagos_data %}
+    <div class="table-responsive-custom">
+        <table class="table table-hover table-striped">
+            <thead class="table-dark">
                 <tr>
-                    <th>ID</th>
-                    <th>Venta</th>
+                    <th>Pago #</th>
+                    <th>Venta #</th>
                     <th>Cliente</th>
-                    <th>Monto</th>
+                    <th class="text-end">Monto</th>
                     <th>Fecha</th>
                 </tr>
             </thead>
             <tbody>
-                {% for pago in pagos %}
+                {% for item in pagos_data %}
                 <tr>
-                    <td>#{{ pago.id }}</td>
-                    <td>#{{ pago.venta.id }}</td>
-                    <td>{{ pago.venta.cliente.nombre }}</td>
-                    <td>${{ pago.monto }}</td>
-                    <td>{{ pago.fecha|date:"d/m/Y" }}</td>
+                    <td><strong>#{{ item.pago.id }}</strong></td>
+                    <td><strong>#{{ item.venta_id }}</strong></td>
+                    <td>{{ item.cliente }}</td>
+                    <td class="text-end" style="color: green; font-weight: bold;">${{ item.monto|floatformat:0 }}</td>
+                    <td>{{ item.fecha|date:"d/m/Y" }}</td>
                 </tr>
-                {% empty %}
-                <tr><td colspan="5" class="text-center text-muted">Sin datos</td></tr>
                 {% endfor %}
             </tbody>
+            <tfoot class="table-dark">
+                <tr>
+                    <td colspan="3"><strong>TOTAL</strong></td>
+                    <td class="text-end"><strong style="color: #00ff00;">${{ total_monto|floatformat:0 }}</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
+    {% else %}
+    <div class="alert alert-info">No se encontraron pagos con los criterios especificados.</div>
+    {% endif %}
 </div>
 {% endblock %}
