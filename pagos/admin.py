@@ -11,7 +11,16 @@ class PagoAdmin(admin.ModelAdmin):
     list_display = ('id', 'venta', 'monto', 'fecha', 'ver_total_venta', 'ver_saldo_pendiente')
     list_filter = ('fecha',)
     search_fields = ('venta__cliente__nombre', 'venta__id')
-    fields = ('venta', 'monto')
+    readonly_fields = ('mostrador_total', 'mostrador_total_pagado', 'mostrador_saldo')
+    fieldsets = (
+        ('Pago', {
+            'fields': ('venta', 'monto', 'fecha')
+        }),
+        ('Resumen de Pagos', {
+            'fields': ('mostrador_total', 'mostrador_total_pagado', 'mostrador_saldo'),
+            'classes': ('wide',)
+        }),
+    )
     
     def get_urls(self):
         urls = super().get_urls()
@@ -40,11 +49,32 @@ class PagoAdmin(admin.ModelAdmin):
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'venta':
-            # Obtener IDs de ventas con saldo pendiente
             todas_ventas = Venta.objects.select_related('cliente').order_by('-fecha')
             ventas_pendientes_ids = [v.id for v in todas_ventas if v.saldo_pendiente() > 0]
             kwargs['queryset'] = Venta.objects.filter(id__in=ventas_pendientes_ids).select_related('cliente').order_by('-fecha')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def mostrador_total(self, obj=None):
+        if obj and obj.venta:
+            return format_html('💰 <strong>${:,}</strong>', obj.venta.total)
+        return format_html('<span style="color: #999;">Selecciona una venta</span>')
+    mostrador_total.short_description = 'Total Venta'
+    
+    def mostrador_total_pagado(self, obj=None):
+        if obj and obj.venta:
+            pagado = obj.venta.total_pagado()
+            return format_html('<span style="color: green; font-weight: bold;">✅ ${:,}</span>', int(pagado))
+        return format_html('<span style="color: #999;">Selecciona una venta</span>')
+    mostrador_total_pagado.short_description = 'Total Pagado'
+    
+    def mostrador_saldo(self, obj=None):
+        if obj and obj.venta:
+            saldo = obj.venta.saldo_pendiente()
+            color = 'green' if saldo == 0 else '#ff6b6b'
+            icon = '✅' if saldo == 0 else '⚠️'
+            return format_html(f'<span style="color: {color}; font-weight: bold;">{icon} ${saldo:,}</span>')
+        return format_html('<span style="color: #999;">Selecciona una venta</span>')
+    mostrador_saldo.short_description = 'Saldo Pendiente'
     
     def ver_total_venta(self, obj):
         return f"${obj.venta.total:,}"
