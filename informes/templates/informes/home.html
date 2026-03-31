@@ -1,0 +1,30 @@
+{% extends "informes/base.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h1>📊 Bienvenido a Informes</h1>
+        <p class="lead">Selecciona un reporte del menú lateral para comenzar.</p>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5>👥 Clientes</h5>
+                        <p>Análisis de clientes y sus ventas</p>
+                        <a href="{% url 'informes:clientes' %}" class="btn btn-sm btn-primary">Ver →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5>📦 Productos</h5>
+                        <p>Análisis de productos vendidos</p>
+                        <a href="{% url 'informes:productos' %}" class="btn btn-sm btn-primary">Ver →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
