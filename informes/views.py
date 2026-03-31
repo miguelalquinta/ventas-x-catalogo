@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Sum, Count, Q
 from datetime import datetime, timedelta
-from ventas.models import Venta, DetalleVenta, DetalleVentaStock, Pago
+from ventas.models import Venta, DetalleVenta, DetalleVentaStock
+from pagos.models import Pago
 from stock.models import ProductoStock
 from catalogo.models import ProductoCampana
 from campanas.models import Campana
