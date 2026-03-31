@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.utils.html import format_html
+from django.utils.html import format_html, mark_safe
 from django.urls import path
 from django.http import JsonResponse
 from .models import Pago, VentaPendiente
@@ -11,13 +11,13 @@ class PagoAdmin(admin.ModelAdmin):
     list_display = ('id', 'venta', 'monto', 'fecha', 'ver_total_venta', 'ver_saldo_pendiente')
     list_filter = ('fecha',)
     search_fields = ('venta__cliente__nombre', 'venta__id')
-    readonly_fields = ('mostrador_total', 'mostrador_total_pagado', 'mostrador_saldo')
+    readonly_fields = ('resumen_venta_html',)
     fieldsets = (
         ('Pago', {
             'fields': ('venta', 'monto')
         }),
-        ('Resumen de Pagos', {
-            'fields': ('mostrador_total', 'mostrador_total_pagado', 'mostrador_saldo'),
+        ('Resumen de la Venta', {
+            'fields': ('resumen_venta_html',),
             'classes': ('wide',)
         }),
     )
@@ -57,27 +57,20 @@ class PagoAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Venta.objects.filter(id__in=ventas_pendientes_ids).select_related('cliente').order_by('-fecha')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
-    def mostrador_total(self, obj=None):
-        if obj and obj.venta:
-            return format_html('💰 <strong>${:,}</strong>', obj.venta.total)
-        return format_html('<span style="color: #999;">Selecciona una venta</span>')
-    mostrador_total.short_description = 'Total Venta'
-    
-    def mostrador_total_pagado(self, obj=None):
-        if obj and obj.venta:
-            pagado = obj.venta.total_pagado()
-            return format_html('<span style="color: green; font-weight: bold;">✅ ${:,}</span>', int(pagado))
-        return format_html('<span style="color: #999;">Selecciona una venta</span>')
-    mostrador_total_pagado.short_description = 'Total Pagado'
-    
-    def mostrador_saldo(self, obj=None):
-        if obj and obj.venta:
-            saldo = obj.venta.saldo_pendiente()
-            color = 'green' if saldo == 0 else '#ff6b6b'
-            icon = 'PAGADO' if saldo == 0 else 'PENDIENTE'
-            return format_html(f'<span style="color: {color}; font-weight: bold;">{icon}: ${saldo:,}</span>')
-        return format_html('<span style="color: #999;">Selecciona una venta</span>')
-    mostrador_saldo.short_description = 'Saldo Pendiente'
+    def resumen_venta_html(self, obj=None):
+        return mark_safe('''
+            <div id="resumen-venta" style="background-color: #1a1a1a; color: #fff; padding: 20px; border-radius: 8px; font-family: monospace;">
+                <p style="margin: 5px 0;"><strong>CLIENTE:</strong> <span id="resumen-cliente">Selecciona una venta</span></p>
+                <p style="margin: 5px 0;"><strong>TOTAL VENTA:</strong> <span id="resumen-total" style="color: #00ff00; font-size: 18px;">-</span></p>
+                <p style="margin: 5px 0;"><strong>TOTAL PAGADO:</strong> <span id="resumen-pagado" style="color: #00aa00;">-</span></p>
+                <p style="margin: 5px 0;"><strong>SALDO PENDIENTE:</strong> <span id="resumen-saldo" style="color: #ff6b6b; font-weight: bold;">-</span></p>
+                <p style="margin: 10px 0 5px 0;"><strong>PORCENTAJE PAGADO:</strong> <span id="resumen-porcentaje">0</span>%</p>
+                <div style="background-color: #333; height: 20px; border-radius: 3px; overflow: hidden; margin-top: 10px;">
+                    <div id="resumen-barra" style="background-color: #00ff00; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        ''')
+    resumen_venta_html.short_description = 'Resumen de la Venta'
     
     def ver_total_venta(self, obj):
         return f"${obj.venta.total:,}"
