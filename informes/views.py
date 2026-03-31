@@ -1,33 +1,49 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.db.models import Sum, Count, Q
-from datetime import datetime, timedelta
+from django.db.models import Sum, Count
 
-def informes_home(request):
-    return render(request, 'informes/home.html')
-
-def clientes_informe(request):
+def get_models():
+    from ventas.models import Venta, DetalleVenta, DetalleVentaStock
+    from pagos.models import Pago
+    from campanas.models import Campana
     from clientes.models import Cliente
-    clientes = Cliente.objects.all()
+    from productos.models import Producto, ProductoCampana
+    return {
+        'Venta': Venta, 'DetalleVenta': DetalleVenta, 'DetalleVentaStock': DetalleVentaStock,
+        'Pago': Pago, 'Campana': Campana, 'Cliente': Cliente, 'Producto': Producto, 'ProductoCampana': ProductoCampana
+    }
+
+def home(request):
+    models = get_models()
+    Cliente = models['Cliente']
+    clientes_count = Cliente.objects.count()
+    return render(request, 'informes/home.html', {'clientes_count': clientes_count})
+
+def clientes_list(request):
+    models = get_models()
+    clientes = models['Cliente'].objects.all().order_by('nombre')
     return render(request, 'informes/clientes.html', {'clientes': clientes})
 
-def productos_informe(request):
-    return render(request, 'informes/productos.html')
+def productos_list(request):
+    models = get_models()
+    productos = models['Producto'].objects.all().order_by('nombre')
+    return render(request, 'informes/productos.html', {'productos': productos})
 
-def ventas_informe(request):
-    from ventas.models import Venta
-    ventas = Venta.objects.all()
+def ventas_list(request):
+    models = get_models()
+    ventas = models['Venta'].objects.all().order_by('-fecha')
     return render(request, 'informes/ventas.html', {'ventas': ventas})
 
-def pagos_informe(request):
-    from pagos.models import Pago
-    pagos = Pago.objects.all()
+def pagos_list(request):
+    models = get_models()
+    pagos = models['Pago'].objects.all().order_by('-fecha')
     return render(request, 'informes/pagos.html', {'pagos': pagos})
 
-def campanas_informe(request):
-    from campanas.models import Campana
-    campanas = Campana.objects.all()
+def campanas_list(request):
+    models = get_models()
+    campanas = models['Campana'].objects.all().order_by('-fecha_inicio')
     return render(request, 'informes/campanas.html', {'campanas': campanas})
 
-def deudas_informe(request):
-    return render(request, 'informes/deudas.html')
+def deudas_list(request):
+    models = get_models()
+    ventas = models['Venta'].objects.filter(saldo__gt=0).order_by('cliente')
+    return render(request, 'informes/deudas.html', {'ventas': ventas})

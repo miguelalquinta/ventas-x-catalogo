@@ -3,154 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Informes{% endblock %} - Ventas x Catálogo</title>
+    <title>{% block title %}Informes{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.3rem;
-        }
-        .container-main {
-            margin-top: 2rem;
-            margin-bottom: 3rem;
-        }
-        .card {
-            border: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
-        }
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            font-weight: bold;
-        }
-        .btn-export {
-            margin-left: 0.5rem;
-        }
-        .badge-activa {
-            background-color: #28a745;
-        }
-        .badge-cerrada {
-            background-color: #6c757d;
-        }
-        .estado-pagada {
-            color: #28a745;
-            font-weight: bold;
-        }
-        .estado-pendiente {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        .table-responsive-custom {
-            overflow-x: auto;
-        }
-        @media (max-width: 768px) {
-            .container-main {
-                margin-top: 1rem;
-            }
-            .table {
-                font-size: 0.875rem;
-            }
-            .btn-sm {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.75rem;
-            }
-        }
-        .filtros-section {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .filtros-section h5 {
-            color: #667eea;
-            margin-bottom: 1rem;
-            font-weight: bold;
-        }
-        .resumen-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .resumen-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid #667eea;
-        }
-        .resumen-card h6 {
-            color: #666;
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-        }
-        .resumen-card .valor {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-    </style>
-    {% block extra_css %}{% endblock %}
+    <style>body { background-color: #f8f9fa; } .navbar { background-color: #343a40; } .navbar a { color: white !important; }</style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/informes/">📊 Informes y Reportes</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/informes/">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/informes/clientes/">Clientes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/informes/productos/">Productos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/informes/ventas/">Ventas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/informes/pagos/">Pagos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/informes/campanas/">Campañas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/informes/deudas/">Deudas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/">Admin</a>
-                    </li>
-                </ul>
+        <div class="container">
+            <a class="navbar-brand" href="/informes/">📊 Informes</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/informes/clientes/">Clientes</a>
+                <a class="nav-link" href="/informes/productos/">Productos</a>
+                <a class="nav-link" href="/informes/ventas/">Ventas</a>
+                <a class="nav-link" href="/informes/pagos/">Pagos</a>
+                <a class="nav-link" href="/informes/campanas/">Campañas</a>
+                <a class="nav-link" href="/informes/deudas/">Deudas</a>
             </div>
         </div>
     </nav>
-
-    <div class="container-fluid container-main">
-        {% block content %}{% endblock %}
-    </div>
-
-    <footer style="background-color: #f8f9fa; padding: 2rem; text-align: center; color: #666; margin-top: 3rem; border-top: 1px solid #dee2e6;">
-        <p>Ventas x Catálogo &copy; 2024 - Informes y Reportes</p>
-    </footer>
-
+    <div class="container mt-4">{% block content %}{% endblock %}</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_js %}{% endblock %}
 </body>
 </html>
