@@ -10,7 +10,6 @@ urlpatterns = [
     path('', RedirectView.as_view(url='/admin/', permanent=False)),  # ← AGREGAR ESTA LÍNEA
     path('admin/', admin.site.urls),
     path('dashboard/', include('dashboard.urls')),
-    path('informes/', include('informes.urls')),
     path('ventas/', include('ventas.urls')),
     path('stock/', include('stock.urls')),
     path('productos/', include('productos.urls')),  # 👈 ESTA LÍNEA

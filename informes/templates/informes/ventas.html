@@ -1,3 +1,0 @@
-{% extends "informes/base.html" %}
-{% block title %}Ventas{% endblock %}
-{% block content %}<h2>💰 Ventas</h2><table class="table table-striped"><thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Pagado</th><th>Saldo</th></tr></thead><tbody>{% for venta in ventas %}<tr><td>{{ venta.fecha }}</td><td>{{ venta.cliente }}</td><td>${{ venta.total }}</td><td>${{ venta.pagado }}</td><td>${{ venta.saldo }}</td></tr>{% endfor %}</tbody></table>{% endblock %}

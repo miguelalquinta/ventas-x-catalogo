@@ -1,3 +1,0 @@
-{% extends "informes/base.html" %}
-{% block title %}Pagos{% endblock %}
-{% block content %}<h2>💳 Pagos</h2><table class="table table-striped"><thead><tr><th>Fecha</th><th>Monto</th><th>Método</th></tr></thead><tbody>{% for pago in pagos %}<tr><td>{{ pago.fecha }}</td><td>${{ pago.monto }}</td><td>{{ pago.metodo_pago }}</td></tr>{% endfor %}</tbody></table>{% endblock %}

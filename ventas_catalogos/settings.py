@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'productos',
     'campanas',
     'empresas',
-    'informes',
     'vendedores',
     'ventas',
     'pagos',

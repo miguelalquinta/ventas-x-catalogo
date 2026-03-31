@@ -1,3 +1,0 @@
-{% extends "informes/base.html" %}
-{% block title %}Productos{% endblock %}
-{% block content %}<h2>📦 Productos</h2><table class="table table-striped"><thead><tr><th>Nombre</th><th>Precio</th><th>Stock</th></tr></thead><tbody>{% for producto in productos %}<tr><td>{{ producto.nombre }}</td><td>${{ producto.precio }}</td><td>{{ producto.stock }}</td></tr>{% endfor %}</tbody></table>{% endblock %}

@@ -1,3 +1,0 @@
-{% extends "informes/base.html" %}
-{% block title %}Deudas{% endblock %}
-{% block content %}<h2>⚠️ Deudas Pendientes</h2><table class="table table-striped"><thead><tr><th>Cliente</th><th>Total</th><th>Saldo Pendiente</th></tr></thead><tbody>{% for venta in ventas %}<tr><td>{{ venta.cliente }}</td><td>${{ venta.total }}</td><td>${{ venta.saldo }}</td></tr>{% endfor %}</tbody></table>{% endblock %}

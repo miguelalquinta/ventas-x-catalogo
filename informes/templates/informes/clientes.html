@@ -1,3 +1,0 @@
-{% extends "informes/base.html" %}
-{% block title %}Clientes{% endblock %}
-{% block content %}<h2>👥 Clientes</h2><table class="table table-striped"><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th></tr></thead><tbody>{% for cliente in clientes %}<tr><td>{{ cliente.nombre }}</td><td>{{ cliente.email }}</td><td>{{ cliente.telefono }}</td></tr>{% endfor %}</tbody></table>{% endblock %}

@@ -1,3 +1,0 @@
-{% extends "informes/base.html" %}
-{% block title %}Campañas{% endblock %}
-{% block content %}<h2>📢 Campañas</h2><table class="table table-striped"><thead><tr><th>Nombre</th><th>Fecha Inicio</th><th>Activa</th></tr></thead><tbody>{% for campana in campanas %}<tr><td>{{ campana.nombre }}</td><td>{{ campana.fecha_inicio }}</td><td>{% if campana.activa %}✅{% else %}❌{% endif %}</td></tr>{% endfor %}</tbody></table>{% endblock %}
